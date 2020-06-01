@@ -2,49 +2,75 @@ import React, { Component } from 'react'
 import { render } from 'react-dom'
 import './index.css'
 
-class Squares extends Component {
+function Squares(props) {
+    return (
+        <div>
+            <button
+                className="square"
+                onClick={props.onclick}>
+                {props.value}
+            </button>
+        </div>
+    )
+
+}
+
+class Board extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            value: null,
+            /*   每个子组件的状态都不同，使用数组来保存,  且需要为子组件添加各自的标识
+                       1 子传父   子触发父通过props传来的函数，传递参数
+                       2 父在渲染子时对其进行标识   调用另定义的函数来渲染子组件  
+                                                                            1 使用标识来匹配状态数组            value
+                                                                            2 并给传递的函数添加了标识作为参数()   onclick
+                                                                                                                    */
+            value: Array(9).fill(null),
             xIsNext: true
         }
     }
-    render() {
+
+    handleClick(i) {
+        const value = this.state.value.slice()    //不要修改原数据
+        if (value[i]) {
+            return
+        }
+        value[i] = this.state.xIsNext ? 'x' : 'o'
+        this.setState({
+            value,
+            xIsNext: !this.state.xIsNext
+        })
+    }
+
+    renderSquares(i) {
         return (
-            <div>
-                <button
-                    className="square"
-                    // 只能修改子组件自身的状态 影响不到其他子组件的状态
-                    onClick={() => this.setState({ value: this.state.xIsNext ? 'x' : 'o', xIsNext: !this.state.xIsNext })}>
-                    {this.state.value}
-                </button>
-            </div>
+            < Squares
+                value={this.state.value[i]}
+                onclick={() => this.handleClick(i)} />           //调用之前便传递了参数   参考bind
         )
     }
-}
-
-//状态提升 将子组件的state交给父组件管理
-//第一次状态提升：子组件中只能管理各自状态，这里子组件之间的状态互相影响
-class Board extends Component {
 
     render() {
+        let status = `now player:${this.state.xIsNext ? 'X' : 'O'}`
         return (
             <div>
+                <h1>{status}</h1>
                 <div className='board-row'>
-                    <Squares value={0} />
-                    <Squares value={1} />
-                    <Squares value={2} />
+                    {/* <Squares value={this.state.value} onclick={() => this.handleClick()} /> */}
+                    {/* <Squares value={this.state.value} onclick={() => this.handleClick()} /> */}
+                    {this.renderSquares(0)}
+                    {this.renderSquares(1)}
+                    {this.renderSquares(2)}
                 </div>
                 <div className='board-row'>
-                    <Squares value={3} />
-                    <Squares value={4} />
-                    <Squares value={5} />
+                    {this.renderSquares(3)}
+                    {this.renderSquares(4)}
+                    {this.renderSquares(5)}
                 </div>
                 <div className='board-row'>
-                    <Squares value={6} />
-                    <Squares value={7} />
-                    <Squares value={8} />
+                    {this.renderSquares(6)}
+                    {this.renderSquares(7)}
+                    {this.renderSquares(8)}
                 </div>
             </div >
         )
