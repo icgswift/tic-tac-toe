@@ -18,42 +18,36 @@ class Board extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            // 新建一个数组用于添加历史记录
             history: [{ value: Array(9).fill(null) }],
             xIsNext: true,
-            /* 为正被渲染的数组添加标识，改变标识即可改变渲染的结果,  
-                       因为想改变渲染结果必须通过render()函数，而调用render()函数的前提是setstate 
-                       该标识的作用相当于是一个指针，指引render渲染history中的哪一个数组
-                                                                                                       */
             renderNumber: 0
         }
     }
 
     handleClick(i) {
         const history = this.state.history
+        const renderStep = history[this.state.renderNumber]
+        const value = renderStep.value.slice()
 
-        // 在renderNumber指针指向的数组基础上添加数据
-        const current = history[this.state.renderNumber]
-
-        const value = current.value.slice()
         if (calculateWinner(value) || value[i]) {
             return
         }
-        value[i] = this.state.xIsNext ? 'x' : 'o'
+
+        value[i] = this.state.xIsNext ? 'X' : 'O'
+        debugger
         this.setState({
             history: [...history, { value }],
             xIsNext: !this.state.xIsNext,
-            renderNumber: this.state.renderNumber + 1
+            renderNumber: this.state.history.length
         })
     }
 
     renderSquares(i) {
-        // 渲染renderNumber指针指向的数组
         const history = this.state.history
-        const current = history[this.state.renderNumber]
+        const renderStep = history[this.state.renderNumber]
         return (
             < Squares
-                value={current.value[i]}
+                value={renderStep.value[i]}
                 onclick={() => this.handleClick(i)} />
         )
     }
@@ -67,24 +61,21 @@ class Board extends Component {
     }
 
     render() {
-        // 对renderNumber指针指向的数组（已响应点击）进行计算
-        const history = this.state.history
-        const current = history[this.state.renderNumber]
         let status
+        const history = this.state.history
+        const renderStep = history[this.state.renderNumber]
 
-        const winner = calculateWinner(current.value)
+        const winner = calculateWinner(renderStep.value)
         if (winner) {
             status = `WINNER:${winner}`
         } else {
             status = `now player:${this.state.xIsNext ? 'X' : 'O'}`
         }
 
-        /* map函数使用callback对数组中每一个元素进行加工，callback返回加工后的元素 这里返回 li */
         const moves = history.map((list, index) => (
-
             <li key={index}>
+                {/* 这里只涉及到对history的读取，使用index作为下标 */}
                 <button onClick={() => this.showHistory(index)}>
-                    {/* 数字0表示false */}
                     跳转至{index ? `第${index}步` : '开始'}
                 </button>
             </li>
